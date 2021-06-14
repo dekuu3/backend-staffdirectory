@@ -10,6 +10,13 @@ using System.Threading.Tasks;
 namespace backend_staffdirectory {
     public class Program {
         public static void Main(string[] args) {
+            var host = new HostBuilder()
+                .ConfigureAppConfiguration((hostContext, builder) => {
+
+                    if (hostContext.HostingEnvironment.IsDevelopment()) {
+                        builder.AddUserSecrets<Program>();
+                    }
+                });
             CreateHostBuilder(args).Build().Run();
         }
 
