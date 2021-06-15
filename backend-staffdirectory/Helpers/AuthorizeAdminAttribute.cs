@@ -18,12 +18,14 @@ public class AuthorizeAdminAttribute : Attribute, IAuthorizationFilter {
             return;
         }
 
-        // right now, http endpoints with the [Authorize] attribute are only allowing 
-        // logged in users with the Admin role
-        //var role = (User)context.HttpContext.Items["Role"];
         if (user.Role != "Admin") {
             // not authorized to access this
             context.Result = new JsonResult(new { message = "You're not authorized" }) { StatusCode = StatusCodes.Status403Forbidden };
         }
+
+        // My attempt at using claims
+        // http endpoints with the [Authorize] attribute are only allowing 
+        // logged in users with the Admin role
+        //var role = (User)context.HttpContext.Items["Role"];
     }
 }

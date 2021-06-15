@@ -23,10 +23,12 @@ namespace backend_staffdirectory.Helpers {
     public class JwtMiddleware {
         private readonly RequestDelegate _next;
         private readonly AppSettings _appSettings;
+        private readonly IDatabaseService _databaseService;
 
-        public JwtMiddleware(RequestDelegate next, IOptions<AppSettings> appSettings) {
+        public JwtMiddleware(RequestDelegate next, IOptions<AppSettings> appSettings, IDatabaseService databaseService) {
             _next = next;
             _appSettings = appSettings.Value;
+            _databaseService = databaseService;
         }
 
         public async Task Invoke(HttpContext context, IUserService userService) {
@@ -56,7 +58,8 @@ namespace backend_staffdirectory.Helpers {
                 //var userRole = jwtToken.Claims.First(x => x.Type == "Role").GetType();
 
                 // attach user to context on successful jwt validation
-                context.Items["User"] = userService.GetById(userId);
+                //context.Items["User"] = userService.GetById(userId);
+                context.Items["User"] = _databaseService.GetUserById(userId).First();
 
                 // attach role to context on successful jwt validation
                 //context.Items["Role"] = userService.GetById(userId).Role;

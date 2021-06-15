@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "bay9zND7lcm4MahF+UQVqPBYUHHh+qUbEmqyYjcxlHMIqDSNZFPNErIsBaX4HR8APDmIy8uf3/MHBN3k7+EYVQ==",
+  "dgSpecHash": "3CgGa2f+1qA7zDGqQzjKr3Xp+wiawGiso4VvQmRSHwtcrfdsV4Z6U5GbL+WNhfHYmJot6LgfSq+S/cDOzn0gOA==",
   "success": true,
   "projectFilePath": "C:\\MyCode\\SANDI\\StaffDirectory\\backend-staffdirectory\\backend-staffdirectory\\backend-staffdirectory.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\sandi\\.nuget\\packages\\dapper\\2.0.90\\dapper.2.0.90.nupkg.sha512",
     "C:\\Users\\sandi\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\sandi\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\5.0.7\\microsoft.aspnetcore.authentication.jwtbearer.5.0.7.nupkg.sha512",
     "C:\\Users\\sandi\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",

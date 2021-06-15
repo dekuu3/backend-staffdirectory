@@ -21,26 +21,23 @@ using backend_staffdirectory.Helpers;
 namespace backend_staffdirectory.Services {
     public interface IUserService {
         AuthenticateResponse Authenticate(AuthenticateRequest model);
-        IEnumerable<User> GetAll();
-        User GetById(int id);
+        //IEnumerable<User> GetAll();
+        //User GetById(int id);
     }
 
     public class UserService : IUserService {
-        // users hardcoded for simplicity, store in a db with hashed passwords in production applications
-        private List<User> _users = new List<User>
-        {
-            new User { Id = 1, FirstName = "First", LastName = "User", Username = "test", Password = "test", Role = Role.User },
-            new User { Id = 2, FirstName = "Second", LastName = "User", Username = "admin", Password = "admin", Role = Role.Admin }
-        };
 
         private readonly AppSettings _appSettings;
+        private readonly IDatabaseService _dbService;
 
-        public UserService(IOptions<AppSettings> appSettings) {
+        public UserService(IOptions<AppSettings> appSettings, IDatabaseService dbService) {
             _appSettings = appSettings.Value;
+            _dbService = dbService;
         }
 
         public AuthenticateResponse Authenticate(AuthenticateRequest model) {
-            var user = _users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+            //var user = _users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+            var user = _dbService.GetUserByUsernameAndPassword(model.Username).First();
 
             // return null if user not found
             if (user == null) return null;
@@ -51,13 +48,13 @@ namespace backend_staffdirectory.Services {
             return new AuthenticateResponse(user, token);
         }
 
-        public IEnumerable<User> GetAll() {
-            return _users;
-        }
+        //public IEnumerable<User> GetAll() {
+        //    return _users;
+        //}
 
-        public User GetById(int id) {
-            return _users.FirstOrDefault(x => x.Id == id);
-        }
+        //public User GetById(int id) {
+        //    return _users.FirstOrDefault(x => x.Id == id);
+        //}
 
         // helper methods
 
@@ -67,7 +64,7 @@ namespace backend_staffdirectory.Services {
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(new[] { 
-                    new Claim("id", user.Id.ToString())
+                    new Claim("id", user.Id.ToString()),
                     //new Claim(ClaimTypes.Role, user.Role)
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),

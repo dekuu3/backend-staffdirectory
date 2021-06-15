@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using backend_staffdirectory.Models;
 using backend_staffdirectory.Services;
 using backend_staffdirectory.Entities;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System;
 
 namespace backend_staffdirectory.Controllers {
 
@@ -14,9 +17,11 @@ namespace backend_staffdirectory.Controllers {
     [Route("[controller]")]
     public class UsersController : ControllerBase {
         private IUserService _userService;
+        private IDatabaseService _dbService;
 
-        public UsersController(IUserService userService) {
+        public UsersController(IUserService userService, IDatabaseService databaseService) {
             _userService = userService;
+            _dbService = databaseService;
         }
 
         [HttpPost("authenticate")]
@@ -29,11 +34,17 @@ namespace backend_staffdirectory.Controllers {
             return Ok(response);
         }
 
+        //[AuthorizeAdmin]
+        //[HttpGet]
+        //public IActionResult GetAll() {
+        //    var users = _userService.GetAll();
+        //    return Ok(users);
+        //}
+
         [AuthorizeAdmin]
         [HttpGet]
-        public IActionResult GetAll() {
-            var users = _userService.GetAll();
-            return Ok(users);
+        public List<User> GetUsers() {
+            return _dbService.GetAllUsers();
         }
     }
 }

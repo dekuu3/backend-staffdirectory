@@ -25,6 +25,6 @@ namespace backend_staffdirectory {
                 .ConfigureWebHostDefaults(webBuilder => {
                     webBuilder.UseStartup<Startup>()
                         .UseUrls("http://localhost:4000");
-                });
+                }).UseDefaultServiceProvider(options => options.ValidateScopes = false);
     }
 }
