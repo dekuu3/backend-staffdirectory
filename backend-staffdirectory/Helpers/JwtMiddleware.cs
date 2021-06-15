@@ -1,4 +1,15 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿/*
+ * This middleware checks if there is a token in the request "Authorization" header
+ *      If so:
+ *      - validates token
+ *      - extracts user id from token
+ *      - attaches authenticated user  and role to the current httpcontext.items collection
+ *          to make it accessible within the scope of the current request
+ * If theres no token or any of these steps fail then no user is attached to the httpcontext and
+ * and the request is only able to access the public routes
+ */
+
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -42,9 +53,13 @@ namespace backend_staffdirectory.Helpers {
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                //var userRole = jwtToken.Claims.First(x => x.Type == "Role").GetType();
 
                 // attach user to context on successful jwt validation
                 context.Items["User"] = userService.GetById(userId);
+
+                // attach role to context on successful jwt validation
+                //context.Items["Role"] = userService.GetById(userId).Role;
             }
             catch {
                 // do nothing if jwt validation fails

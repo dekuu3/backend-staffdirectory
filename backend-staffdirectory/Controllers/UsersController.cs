@@ -6,6 +6,7 @@
 using Microsoft.AspNetCore.Mvc;
 using backend_staffdirectory.Models;
 using backend_staffdirectory.Services;
+using backend_staffdirectory.Entities;
 
 namespace backend_staffdirectory.Controllers {
 
@@ -28,7 +29,7 @@ namespace backend_staffdirectory.Controllers {
             return Ok(response);
         }
 
-        [Authorize]
+        [AuthorizeAdmin]
         [HttpGet]
         public IActionResult GetAll() {
             var users = _userService.GetAll();

@@ -29,7 +29,8 @@ namespace backend_staffdirectory.Services {
         // users hardcoded for simplicity, store in a db with hashed passwords in production applications
         private List<User> _users = new List<User>
         {
-            new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test" }
+            new User { Id = 1, FirstName = "First", LastName = "User", Username = "test", Password = "test", Role = Role.User },
+            new User { Id = 2, FirstName = "Second", LastName = "User", Username = "admin", Password = "admin", Role = Role.Admin }
         };
 
         private readonly AppSettings _appSettings;
@@ -65,7 +66,10 @@ namespace backend_staffdirectory.Services {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor {
-                Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
+                Subject = new ClaimsIdentity(new[] { 
+                    new Claim("id", user.Id.ToString())
+                    //new Claim(ClaimTypes.Role, user.Role)
+                }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };

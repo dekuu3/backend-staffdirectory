@@ -1,5 +1,5 @@
 ﻿/*
- * Custom attribute ensure only those authorized may access a particular api endpoint
+ * Custom attribute ensures any logged in "User" role is authorized to access a particular api endpoint
  */
 
 using Microsoft.AspNetCore.Http;
@@ -14,7 +14,8 @@ public class AuthorizeAttribute : Attribute, IAuthorizationFilter {
         var user = (User)context.HttpContext.Items["User"];
         if (user == null) {
             // not logged in
-            context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+            context.Result = new JsonResult(new { message = "You're not logged in" }) { StatusCode = StatusCodes.Status401Unauthorized };
+            return;
         }
     }
 }

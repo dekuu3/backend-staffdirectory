@@ -54,6 +54,11 @@ namespace backend_staffdirectory.Contexts {
                     .IsRequired()
                     .HasMaxLength(50);
 
+                entity.Property(e => e.Role)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasDefaultValueSql("'0'");
+
                 entity.HasOne(f => f.UserInfo)
                     .WithOne(f => f.User)
                     .HasForeignKey<UserInfo>(fd => fd.UserId);
@@ -82,11 +87,6 @@ namespace backend_staffdirectory.Contexts {
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.Position)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.Privileges)
                     .IsRequired()
                     .HasMaxLength(50)
                     .HasDefaultValueSql("'0'");

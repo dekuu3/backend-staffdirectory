@@ -39,6 +39,13 @@ namespace backend_staffdirectory.Migrations
                     b.Property<string>("Password")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasDefaultValueSql("'0'");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -65,13 +72,6 @@ namespace backend_staffdirectory.Migrations
                         .HasDefaultValueSql("'0'");
 
                     b.Property<string>("Position")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .HasDefaultValueSql("'0'");
-
-                    b.Property<string>("Privileges")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
