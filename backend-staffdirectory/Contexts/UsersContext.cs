@@ -1,9 +1,6 @@
-﻿using System;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using backend_staffdirectory.Entities;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 #nullable disable
 

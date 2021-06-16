@@ -1,15 +1,15 @@
-﻿/*
- * This controls the routes and http requests received from the front-end.
- * Makes use of the UserService to authenticate and retrieve users ( via the IUserService interface)
- */
-
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using backend_staffdirectory.Models;
 using backend_staffdirectory.Services;
 using backend_staffdirectory.Entities;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
+
+/*
+ * This controls the routes and http requests received from the front-end.
+ * Makes use of the UserService to authenticate and retrieve users ( via the IUserService interface)
+ */
 
 namespace backend_staffdirectory.Controllers {
 
@@ -33,13 +33,6 @@ namespace backend_staffdirectory.Controllers {
 
             return Ok(response);
         }
-
-        //[AuthorizeAdmin]
-        //[HttpGet]
-        //public IActionResult GetAll() {
-        //    var users = _userService.GetAll();
-        //    return Ok(users);
-        //}
 
         [AuthorizeAdmin]
         [HttpGet]

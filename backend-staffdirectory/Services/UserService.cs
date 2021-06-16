@@ -21,8 +21,6 @@ using backend_staffdirectory.Helpers;
 namespace backend_staffdirectory.Services {
     public interface IUserService {
         AuthenticateResponse Authenticate(AuthenticateRequest model);
-        //IEnumerable<User> GetAll();
-        //User GetById(int id);
     }
 
     public class UserService : IUserService {
@@ -36,25 +34,16 @@ namespace backend_staffdirectory.Services {
         }
 
         public AuthenticateResponse Authenticate(AuthenticateRequest model) {
-            //var user = _users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
-            var user = _dbService.GetUserByUsernameAndPassword(model.Username).First();
+            var user = _dbService.GetUserByUsernameAndPassword(model.Username, model.Password);
 
             // return null if user not found
-            if (user == null) return null;
+            if (user.Count() == 0 || user == null) return null;
 
             // authentication successful so generate jwt token
-            var token = generateJwtToken(user);
+            var token = generateJwtToken(user.First());
 
-            return new AuthenticateResponse(user, token);
+            return new AuthenticateResponse(user.First(), token);
         }
-
-        //public IEnumerable<User> GetAll() {
-        //    return _users;
-        //}
-
-        //public User GetById(int id) {
-        //    return _users.FirstOrDefault(x => x.Id == id);
-        //}
 
         // helper methods
 

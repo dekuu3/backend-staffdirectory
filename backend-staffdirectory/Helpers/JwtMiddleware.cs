@@ -1,4 +1,14 @@
-﻿/*
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using backend_staffdirectory.Services;
+
+/*
  * This middleware checks if there is a token in the request "Authorization" header
  *      If so:
  *      - validates token
@@ -8,16 +18,6 @@
  * If theres no token or any of these steps fail then no user is attached to the httpcontext and
  * and the request is only able to access the public routes
  */
-
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using backend_staffdirectory.Services;
 
 namespace backend_staffdirectory.Helpers {
     public class JwtMiddleware {
@@ -58,14 +58,13 @@ namespace backend_staffdirectory.Helpers {
                 //var userRole = jwtToken.Claims.First(x => x.Type == "Role").GetType();
 
                 // attach user to context on successful jwt validation
-                //context.Items["User"] = userService.GetById(userId);
                 context.Items["User"] = _databaseService.GetUserById(userId).First();
 
                 // attach role to context on successful jwt validation
                 //context.Items["Role"] = userService.GetById(userId).Role;
             }
             catch {
-                // do nothing if jwt validation fails
+                // jwt validation fails
                 // user is not attached to context so request won't have access to secure routes
             }
         }

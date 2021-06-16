@@ -1,22 +1,14 @@
 ﻿using Microsoft.Extensions.Configuration;
-using backend_staffdirectory.Contexts;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using backend_staffdirectory.Entities;
 using MySqlConnector;
 using Dapper;
-using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace backend_staffdirectory.Services {
     public interface IDatabaseService {
-        //methods in DatabaseService class
         List<User> GetAllUsers();
-
-        List<User> GetUserByUsernameAndPassword(string un);
-
+        List<User> GetUserByUsernameAndPassword(string un, string pw);
         List<User> GetUserById(int id);
     }
 
@@ -33,30 +25,99 @@ namespace backend_staffdirectory.Services {
 
         public List<User> GetAllUsers() {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
-            //string sqlAllUsers = "SELECT * FROM users";
-            string test = "SELECT users.FirstName, users.LastName, users.Username, usersinfo.Position FROM users INNER JOIN usersinfo ON users.Id = usersinfo.UserId";
 
-            var allUsers = _conn.Query<User>(test).ToList();
+            string test = "SELECT * FROM users INNER JOIN usersinfo ON users.Id = usersinfo.UserId";
 
-            return allUsers;
+            var allUsers = _conn.Query<UserSql>(test).ToList();
+
+            List<User> newUserList = new();
+
+            foreach (var user in allUsers) {
+                User newUser = new() {
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Username = user.LastName,
+                    Password = user.Password,
+                    Role = user.Role                    
+                };
+
+                UserInfo newUserInfo = new() {
+                    Id = newUser.Id,
+                    UserId = user.UserId,
+                    Email = user.Email,
+                    Supervisor = user.Supervisor,
+                    Position = user.Position,
+                };
+                newUser.UserInfo = newUserInfo;
+                newUserList.Add(newUser);
+            }
+            return newUserList;
         }
 
-        public List<User> GetUserByUsernameAndPassword(string un) {
+        public List<User> GetUserByUsernameAndPassword(string un, string pw) {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
-            string sqlUser = "SELECT * FROM users WHERE users.Username = @Username";
+            string sqlUser = "SELECT * FROM users INNER JOIN usersinfo ON users.Id = usersinfo.UserId WHERE users.Username = @Username AND users.Password = @Password";
 
-            var user = _conn.Query<User>(sqlUser, new { Username = un }).ToList();
+            var allUsers = _conn.Query<UserSql>(sqlUser, new { Username = un, Password = pw }).ToList();
 
-            return user;
+            if (allUsers == null) return null;
+
+            List<User> newUserList = new();
+
+            foreach (var user in allUsers) {
+                User newUser = new() {
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Username = user.LastName,
+                    Password = user.Password,
+                    Role = user.Role
+                };
+
+                UserInfo newUserInfo = new() {
+                    Id = newUser.Id,
+                    UserId = user.UserId,
+                    Email = user.Email,
+                    Supervisor = user.Supervisor,
+                    Position = user.Position,
+                };
+                newUser.UserInfo = newUserInfo;
+                newUserList.Add(newUser);
+            }
+            return newUserList;
         }
 
         public List<User> GetUserById(int id) {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
-            string sqlUser = "SELECT * FROM users WHERE users.Id = @Id";
+            string sqlUser = "SELECT * FROM users JOIN usersinfo ON users.Id = usersinfo.UserId WHERE users.Id = @Id";
 
-            var user = _conn.Query<User>(sqlUser, new { Id = id }).ToList();
+            var allUsers = _conn.Query<UserSql>(sqlUser, new { Id = id }).ToList();
 
-            return user;
+            if (allUsers == null) return null;
+
+            List<User> newUserList = new();
+            foreach (var user in allUsers) {
+                User newUser = new() {
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Username = user.LastName,
+                    Password = user.Password,
+                    Role = user.Role
+                };
+
+                UserInfo newUserInfo = new() {
+                    Id = newUser.Id,
+                    UserId = user.UserId,
+                    Email = user.Email,
+                    Supervisor = user.Supervisor,
+                    Position = user.Position,
+                };
+                newUser.UserInfo = newUserInfo;
+                newUserList.Add(newUser);
+            }
+            return newUserList;
         }
     }
 }
