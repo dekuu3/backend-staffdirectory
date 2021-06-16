@@ -36,19 +36,15 @@ namespace backend_staffdirectory.Services {
         public AuthenticateResponse Authenticate(AuthenticateRequest model) {
             var user = _dbService.GetUserByUsernameAndPassword(model.Username, model.Password);
 
-            // return null if user not found
-            if (user.Count() == 0 || user == null) return null;
+            if (user == null) return null;
 
             // authentication successful so generate jwt token
-            var token = generateJwtToken(user.First());
+            var token = generateJwtToken(user);
 
-            return new AuthenticateResponse(user.First(), token);
+            return new AuthenticateResponse(user, token);
         }
 
-        // helper methods
-
         private string generateJwtToken(User user) {
-            // generate token that is valid for 7 days
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor {

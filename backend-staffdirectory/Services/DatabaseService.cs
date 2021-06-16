@@ -8,8 +8,8 @@ using Dapper;
 namespace backend_staffdirectory.Services {
     public interface IDatabaseService {
         List<User> GetAllUsers();
-        List<User> GetUserByUsernameAndPassword(string un, string pw);
-        List<User> GetUserById(int id);
+        User GetUserByUsernameAndPassword(string un, string pw);
+        User GetUserById(int id);
     }
 
     public class DatabaseService : IDatabaseService {
@@ -28,26 +28,26 @@ namespace backend_staffdirectory.Services {
 
             string test = "SELECT * FROM users INNER JOIN usersinfo ON users.Id = usersinfo.UserId";
 
-            var allUsers = _conn.Query<UserSql>(test).ToList();
+            var users = _conn.Query<UserSql>(test).ToList();
 
             List<User> newUserList = new();
 
-            foreach (var user in allUsers) {
+            foreach (var u in users) {
                 User newUser = new() {
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Username = user.LastName,
-                    Password = user.Password,
-                    Role = user.Role                    
+                    Id = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Username = u.LastName,
+                    Password = u.Password,
+                    Role = u.Role                    
                 };
 
                 UserInfo newUserInfo = new() {
                     Id = newUser.Id,
-                    UserId = user.UserId,
-                    Email = user.Email,
-                    Supervisor = user.Supervisor,
-                    Position = user.Position,
+                    UserId = u.UserId,
+                    Email = u.Email,
+                    Supervisor = u.Supervisor,
+                    Position = u.Position,
                 };
                 newUser.UserInfo = newUserInfo;
                 newUserList.Add(newUser);
@@ -55,69 +55,64 @@ namespace backend_staffdirectory.Services {
             return newUserList;
         }
 
-        public List<User> GetUserByUsernameAndPassword(string un, string pw) {
+        public User GetUserByUsernameAndPassword(string un, string pw) {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
             string sqlUser = "SELECT * FROM users INNER JOIN usersinfo ON users.Id = usersinfo.UserId WHERE users.Username = @Username AND users.Password = @Password";
 
-            var allUsers = _conn.Query<UserSql>(sqlUser, new { Username = un, Password = pw }).ToList();
+            var user = _conn.Query<UserSql>(sqlUser, new { Username = un, Password = pw }).ToList();
 
-            if (allUsers == null) return null;
+            if (user.Count() == 0 || user == null) return null;
 
-            List<User> newUserList = new();
+            User newUser = new();
 
-            foreach (var user in allUsers) {
-                User newUser = new() {
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Username = user.LastName,
-                    Password = user.Password,
-                    Role = user.Role
-                };
-
+            foreach (var u in user) {
+                newUser.Id = u.Id;
+                newUser.FirstName = u.FirstName;
+                newUser.LastName = u.LastName;
+                newUser.Username = u.LastName;
+                newUser.Password = u.Password;
+                newUser.Role = u.Role;
+                
                 UserInfo newUserInfo = new() {
                     Id = newUser.Id,
-                    UserId = user.UserId,
-                    Email = user.Email,
-                    Supervisor = user.Supervisor,
-                    Position = user.Position,
+                    UserId = u.UserId,
+                    Email = u.Email,
+                    Supervisor = u.Supervisor,
+                    Position = u.Position,
                 };
                 newUser.UserInfo = newUserInfo;
-                newUserList.Add(newUser);
             }
-            return newUserList;
+            return newUser;
         }
 
-        public List<User> GetUserById(int id) {
+        public User GetUserById(int id) {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
             string sqlUser = "SELECT * FROM users JOIN usersinfo ON users.Id = usersinfo.UserId WHERE users.Id = @Id";
 
-            var allUsers = _conn.Query<UserSql>(sqlUser, new { Id = id }).ToList();
+            var user = _conn.Query<UserSql>(sqlUser, new { Id = id }).ToList();
 
-            if (allUsers == null) return null;
+            if (user.Count() == 0 || user == null) return null;
 
-            List<User> newUserList = new();
-            foreach (var user in allUsers) {
-                User newUser = new() {
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Username = user.LastName,
-                    Password = user.Password,
-                    Role = user.Role
-                };
+            User newUser = new();
+
+            foreach (var u in user) {
+                newUser.Id = u.Id;
+                newUser.FirstName = u.FirstName;
+                newUser.LastName = u.LastName;
+                newUser.Username = u.LastName;
+                newUser.Password = u.Password;
+                newUser.Role = u.Role;
 
                 UserInfo newUserInfo = new() {
                     Id = newUser.Id,
-                    UserId = user.UserId,
-                    Email = user.Email,
-                    Supervisor = user.Supervisor,
-                    Position = user.Position,
+                    UserId = u.UserId,
+                    Email = u.Email,
+                    Supervisor = u.Supervisor,
+                    Position = u.Position,
                 };
                 newUser.UserInfo = newUserInfo;
-                newUserList.Add(newUser);
             }
-            return newUserList;
+            return newUser;
         }
     }
 }

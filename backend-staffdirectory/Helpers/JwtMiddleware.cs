@@ -58,7 +58,7 @@ namespace backend_staffdirectory.Helpers {
                 //var userRole = jwtToken.Claims.First(x => x.Type == "Role").GetType();
 
                 // attach user to context on successful jwt validation
-                context.Items["User"] = _databaseService.GetUserById(userId).First();
+                context.Items["User"] = _databaseService.GetUserById(userId);
 
                 // attach role to context on successful jwt validation
                 //context.Items["Role"] = userService.GetById(userId).Role;

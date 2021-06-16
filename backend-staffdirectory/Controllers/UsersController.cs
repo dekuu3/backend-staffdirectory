@@ -24,6 +24,7 @@ namespace backend_staffdirectory.Controllers {
             _dbService = databaseService;
         }
 
+        // POST : /users/authenticate
         [HttpPost("authenticate")]
         public IActionResult Authenticate(AuthenticateRequest model) {
             var response = _userService.Authenticate(model);
@@ -34,10 +35,30 @@ namespace backend_staffdirectory.Controllers {
             return Ok(response);
         }
 
-        [AuthorizeAdmin]
+        // GET : /users
+        [Authorize]
         [HttpGet]
-        public List<User> GetUsers() {
-            return _dbService.GetAllUsers();
+        public IActionResult GetUsers() {
+            var response = _dbService.GetAllUsers();
+            
+            if (response == null) {
+                return BadRequest(new { message = "No users found" });
+            }
+
+            return Ok(response);
+        }
+
+        // GET : /users/{id}
+        [Authorize]
+        [HttpGet("{id}")]
+        public IActionResult GetUserById(int id) {
+            var response = _dbService.GetUserById(id);
+
+            if (response == null) {
+                return BadRequest(new { message = "User not found" });
+            }
+
+            return Ok(Response);
         }
     }
 }
