@@ -31,16 +31,16 @@ namespace backend_staffdirectory.Helpers {
             _databaseService = databaseService;
         }
 
-        public async Task Invoke(HttpContext context, IUserService userService) {
+        public async Task Invoke(HttpContext context) {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             if (token != null)
-                attachUserToContext(context, userService, token);
+                attachUserToContext(context, token);
 
             await _next(context);
         }
 
-        private void attachUserToContext(HttpContext context, IUserService userService, string token) {
+        private void attachUserToContext(HttpContext context, string token) {
             try {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(_appSettings.Secret);

@@ -17,10 +17,12 @@ using System.Text;
 using backend_staffdirectory.Models;
 using backend_staffdirectory.Entities;
 using backend_staffdirectory.Helpers;
+using Microsoft.AspNetCore.Http;
 
 namespace backend_staffdirectory.Services {
     public interface IUserService {
         AuthenticateResponse Authenticate(AuthenticateRequest model);
+        int GetIdInContext(string token);
     }
 
     public class UserService : IUserService {
@@ -43,6 +45,26 @@ namespace backend_staffdirectory.Services {
 
             return new AuthenticateResponse(user, token);
         }
+
+        public int GetIdInContext(string token) {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            tokenHandler.ValidateToken(token, new TokenValidationParameters {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
+                ClockSkew = TimeSpan.Zero
+            }, out SecurityToken validatedToken);
+
+            var jwtToken = (JwtSecurityToken)validatedToken;
+            var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+
+            return userId;
+        }
+
+        // HELPER FUNCTIONS
 
         private string generateJwtToken(User user) {
             var tokenHandler = new JwtSecurityTokenHandler();

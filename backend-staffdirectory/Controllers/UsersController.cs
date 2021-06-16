@@ -5,6 +5,8 @@ using backend_staffdirectory.Entities;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
+using Microsoft.AspNetCore.Http;
+using System.Linq;
 
 /*
  * This controls the routes and http requests received from the front-end.
@@ -69,6 +71,24 @@ namespace backend_staffdirectory.Controllers {
 
             if (response == null) {
                 return BadRequest(new { message = "An error occurred" });
+            }
+
+            return Ok(response);
+        }
+
+        // GET : /users/myprofile
+        // Shows the profile of whoever is logged in
+        [Authorize]
+        [HttpGet("myprofile")]
+        public IActionResult getProfile() {
+            var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+            var id = _userService.GetIdInContext(token);
+
+            var response = _dbService.GetUserById(id);
+
+            if (response == null) {
+                return BadRequest(new { message = "User not found" });
             }
 
             return Ok(response);
