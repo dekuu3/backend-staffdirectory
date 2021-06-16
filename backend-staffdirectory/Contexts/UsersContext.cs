@@ -50,6 +50,9 @@ namespace backend_staffdirectory.Contexts {
                     .IsRequired()
                     .HasMaxLength(50);
 
+                entity.HasIndex(e => e.Username)
+                    .IsUnique();
+
                 entity.Property(e => e.Password)
                     .IsRequired()
                     .HasMaxLength(50);
@@ -62,6 +65,9 @@ namespace backend_staffdirectory.Contexts {
                 entity.Property(e => e.Email)
                    .IsRequired()
                    .HasMaxLength(50);
+
+                entity.HasIndex(e => e.Email)
+                    .IsUnique();
 
                 entity.Property(e => e.Supervisor)
                     .IsRequired()

@@ -26,6 +26,7 @@ namespace backend_staffdirectory.Controllers {
             _dbService = databaseService;
         }
 
+        // To log in
         // POST : /users/authenticate
         [HttpPost("authenticate")]
         public IActionResult Authenticate(AuthenticateRequest model) {
@@ -37,10 +38,11 @@ namespace backend_staffdirectory.Controllers {
             return Ok(response);
         }
 
+        // Gets all users
         // GET : /users
         [Authorize]
         [HttpGet]
-        public IActionResult GetUsers() {
+        public IActionResult GetAllUsers() {
             var response = _dbService.GetAllUsers();
 
             if (response == null) {
@@ -50,6 +52,7 @@ namespace backend_staffdirectory.Controllers {
             return Ok(response);
         }
 
+        // Gets user by id
         // GET : /users/{id}
         [Authorize]
         [HttpGet("{id}")]
@@ -63,9 +66,28 @@ namespace backend_staffdirectory.Controllers {
             return Ok(response);
         }
 
+        // Edits user data by id
+        // PUT : /users/{id}/edit
+        [AuthorizeAdmin]
+        [HttpPut("{id}/edit")]
+        public IActionResult EditUser(int id, User user) {
+            return Ok();
+        }
+
+        // Deletes user
+        // DELETE : /users/{id}/delete
+        [AuthorizeAdmin]
+        [HttpDelete("{id}/delete")]
+        public IActionResult DeleteUser(int id) {
+            var response = _dbService.DeleteUserById(id);
+
+            return Ok("User Id " + id + " Successfully Deleted! " + response + " Row Deleted.");
+        }
+
+        // Adds user
         // POST : /users/adduser
         [AuthorizeAdmin]
-        [HttpPost("adduser")]
+        [HttpPut("adduser")]
         public IActionResult AddUser(UserSql user) {
             var response = _dbService.AddUser(user);
 
@@ -76,15 +98,13 @@ namespace backend_staffdirectory.Controllers {
             return Ok(response);
         }
 
+        // Gets the profile of whoever is logged in
         // GET : /users/myprofile
-        // Shows the profile of whoever is logged in
         [Authorize]
         [HttpGet("myprofile")]
-        public IActionResult getProfile() {
+        public IActionResult GetProfile() {
             var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-
             var id = _userService.GetIdInContext(token);
-
             var response = _dbService.GetUserById(id);
 
             if (response == null) {
@@ -92,6 +112,14 @@ namespace backend_staffdirectory.Controllers {
             }
 
             return Ok(response);
+        }
+
+        // Edits user data of whoever's logged in
+        // PUT : /users/myprofile/edit
+        [Authorize]
+        [HttpPut("myprofile/edit")]
+        public IActionResult EditProfile(User user) {
+            return Ok();
         }
     }
 }

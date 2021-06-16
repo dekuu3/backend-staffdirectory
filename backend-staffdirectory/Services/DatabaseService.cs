@@ -4,13 +4,17 @@ using System.Linq;
 using backend_staffdirectory.Entities;
 using MySqlConnector;
 using Dapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend_staffdirectory.Services {
     public interface IDatabaseService {
         List<User> GetAllUsers();
         User GetUserByUsernameAndPassword(string un, string pw);
         User GetUserById(int id);
+        User EditUserById(int id, User user);
+        int DeleteUserById(int id);
         UserSql AddUser(UserSql user);
+
     }
 
     public class DatabaseService : IDatabaseService {
@@ -96,20 +100,37 @@ namespace backend_staffdirectory.Services {
             return newUser;
         }
 
+        public User EditUserById(int id, User user) {
+  
+            return user;
+        }
+
+        public int DeleteUserById(int id) {
+            var _conn = new MySqlConnection(_config["ConnectionString"]);
+            string sql = "DELETE FROM users WHERE Id = @Id";
+
+            var rowsAffected = _conn.Execute(sql, new { id });
+            return rowsAffected;
+        }
+
         public UserSql AddUser(UserSql user) {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
             string sql = "INSERT INTO users (FirstName, LastName, Username, Role, Password, Email, Supervisor, Position) VALUES (@FirstName, @LastName, @Username, @Role, @Password, @Email, @Supervisor, @Position)";
 
-            var query = _conn.Execute(sql, new {
-                user.FirstName,
-                user.LastName,
-                user.Username,
-                user.Role,
-                user.Password,
-                user.Email,
-                user.Supervisor,
-                user.Position
-            });
+            try {
+                var query = _conn.Execute(sql, new {
+                    user.FirstName,
+                    user.LastName,
+                    user.Username,
+                    user.Role,
+                    user.Password,
+                    user.Email,
+                    user.Supervisor,
+                    user.Position
+                });
+            } catch(DbUpdateException) {
+                throw;
+            }
 
             return user;
         }

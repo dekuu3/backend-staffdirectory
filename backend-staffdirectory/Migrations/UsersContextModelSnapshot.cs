@@ -71,6 +71,12 @@ namespace backend_staffdirectory.Migrations
                     b.HasKey("Id")
                         .HasName("pk_user_id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
                     b.ToTable("users");
                 });
 #pragma warning restore 612, 618
