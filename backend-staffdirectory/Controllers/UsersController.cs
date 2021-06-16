@@ -16,8 +16,8 @@ namespace backend_staffdirectory.Controllers {
     [ApiController]
     [Route("[controller]")]
     public class UsersController : ControllerBase {
-        private IUserService _userService;
-        private IDatabaseService _dbService;
+        private readonly IUserService _userService;
+        private readonly IDatabaseService _dbService;
 
         public UsersController(IUserService userService, IDatabaseService databaseService) {
             _userService = userService;
@@ -40,7 +40,7 @@ namespace backend_staffdirectory.Controllers {
         [HttpGet]
         public IActionResult GetUsers() {
             var response = _dbService.GetAllUsers();
-            
+
             if (response == null) {
                 return BadRequest(new { message = "No users found" });
             }
@@ -58,7 +58,20 @@ namespace backend_staffdirectory.Controllers {
                 return BadRequest(new { message = "User not found" });
             }
 
-            return Ok(Response);
+            return Ok(response);
+        }
+
+        // POST : /users/adduser
+        [AuthorizeAdmin]
+        [HttpPost("adduser")]
+        public IActionResult AddUser(UserSql user) {
+            var response = _dbService.AddUser(user);
+
+            if (response == null) {
+                return BadRequest(new { message = "An error occurred" });
+            }
+
+            return Ok(response);
         }
     }
 }

@@ -26,6 +26,11 @@ namespace backend_staffdirectory.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -37,14 +42,26 @@ namespace backend_staffdirectory.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.Property<string>("Password")
-                        .HasColumnType("longtext");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Position")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Role")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)")
-                        .HasDefaultValueSql("'0'");
+                        .HasDefaultValueSql("'User'");
+
+                    b.Property<string>("Supervisor")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -55,62 +72,6 @@ namespace backend_staffdirectory.Migrations
                         .HasName("pk_user_id");
 
                     b.ToTable("users");
-                });
-
-            modelBuilder.Entity("backend_staffdirectory.Entities.UserInfo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .HasDefaultValueSql("'0'");
-
-                    b.Property<string>("Position")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .HasDefaultValueSql("'0'");
-
-                    b.Property<string>("Supervisor")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .HasDefaultValueSql("'0'");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id")
-                        .HasName("pk_userinfo_userid");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("usersinfo");
-                });
-
-            modelBuilder.Entity("backend_staffdirectory.Entities.UserInfo", b =>
-                {
-                    b.HasOne("backend_staffdirectory.Entities.User", "User")
-                        .WithOne("UserInfo")
-                        .HasForeignKey("backend_staffdirectory.Entities.UserInfo", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("backend_staffdirectory.Entities.User", b =>
-                {
-                    b.Navigation("UserInfo");
                 });
 #pragma warning restore 612, 618
         }

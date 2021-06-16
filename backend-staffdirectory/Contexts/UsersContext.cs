@@ -16,8 +16,7 @@ namespace backend_staffdirectory.Contexts {
             _config = config;
         }
 
-        public virtual DbSet<User> Users { get; set; } 
-        public virtual DbSet<UserInfo> UsersInfo { get; set; }
+        public virtual DbSet<User> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
             if (!optionsBuilder.IsConfigured) {
@@ -51,42 +50,26 @@ namespace backend_staffdirectory.Contexts {
                     .IsRequired()
                     .HasMaxLength(50);
 
+                entity.Property(e => e.Password)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
                 entity.Property(e => e.Role)
                     .IsRequired()
                     .HasMaxLength(50)
-                    .HasDefaultValueSql("'0'");
-
-                entity.HasOne(f => f.UserInfo)
-                    .WithOne(f => f.User)
-                    .HasForeignKey<UserInfo>(fd => fd.UserId);
-            });
-
-            modelBuilder.Entity<UserInfo>(entity => {
-                entity.ToTable("usersinfo");
-
-                entity.HasKey(f => f.Id).HasName("pk_userinfo_userid");
-
-                entity.Property(e => e.Id)
-                    .IsRequired()
-                    .UseMySqlIdentityColumn();
-
-                entity.Property(e => e.UserId)
-                    .IsRequired();
+                    .HasDefaultValueSql("'User'");
 
                 entity.Property(e => e.Email)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .HasDefaultValueSql("'0'");
+                   .IsRequired()
+                   .HasMaxLength(50);
 
                 entity.Property(e => e.Supervisor)
                     .IsRequired()
-                    .HasMaxLength(50)
-                    .HasDefaultValueSql("'0'");
+                    .HasMaxLength(50);
 
                 entity.Property(e => e.Position)
                     .IsRequired()
-                    .HasMaxLength(50)
-                    .HasDefaultValueSql("'0'");
+                    .HasMaxLength(50);
             });
 
             OnModelCreatingPartial(modelBuilder);
