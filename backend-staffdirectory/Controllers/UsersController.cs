@@ -111,7 +111,7 @@ namespace backend_staffdirectory.Controllers {
         [HttpGet("myprofile")]
         public IActionResult GetProfile() {
             var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            var id = _userService.GetIdInContext(token);
+            var id = _userService.GetIdInToken(token);
             var response = _dbService.GetUserById(id);
 
             if (response == null) {
@@ -127,7 +127,7 @@ namespace backend_staffdirectory.Controllers {
         [HttpPut("myprofile/edit")]
         public IActionResult EditProfile(UserSql user) {
             var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            var id = _userService.GetIdInContext(token);
+            var id = _userService.GetIdInToken(token);
             var response = _dbService.EditProfileById(id, user);
 
             if (response == null) {

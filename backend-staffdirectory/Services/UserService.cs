@@ -1,12 +1,4 @@
-﻿/*
- * This service:
- *      -authenticates users
- *      -retrieves all users
- *      -gets users by id
- *      -generates jwt tokens for users
- */
-
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -19,10 +11,18 @@ using backend_staffdirectory.Entities;
 using backend_staffdirectory.Helpers;
 using Microsoft.AspNetCore.Http;
 
+/*
+ * This service:
+ *      -authenticates users
+ *      -retrieves all users
+ *      -gets users by id
+ *      -generates jwt tokens for users
+ */
+
 namespace backend_staffdirectory.Services {
     public interface IUserService {
         AuthenticateResponse Authenticate(AuthenticateRequest model);
-        int GetIdInContext(string token);
+        int GetIdInToken(string token);
     }
 
     public class UserService : IUserService {
@@ -46,7 +46,12 @@ namespace backend_staffdirectory.Services {
             return new AuthenticateResponse(user, token);
         }
 
-        public int GetIdInContext(string token) {
+        public int GetIdInToken(string token) {
+            return ReadToken(token);
+        }
+
+        // HELPER FUNCTIONS
+        private int ReadToken(string token) {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
             tokenHandler.ValidateToken(token, new TokenValidationParameters {
@@ -63,8 +68,6 @@ namespace backend_staffdirectory.Services {
 
             return userId;
         }
-
-        // HELPER FUNCTIONS
 
         private string generateJwtToken(User user) {
             var tokenHandler = new JwtSecurityTokenHandler();
