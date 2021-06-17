@@ -103,15 +103,12 @@ namespace backend_staffdirectory.Services {
 
         public User EditUserById(int id, User user) {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
-            string pwSql = "SELECT Id, Password FROM users WHERE Id = @Id";
 
+            string pwSql = "SELECT Id, Password FROM users WHERE Id = @Id";
             var pwQuery = _conn.Query<User>(pwSql, new { Id = id }).ToList();
-            var password = "";
-            var idDb = 0;
-            foreach (var pw in pwQuery) {
-                password = pw.Password;
-                idDb = pw.Id;
-            };
+
+            var password = pwQuery.First().Password;
+            var idDb = pwQuery.First().Id;
 
             string sql = "UPDATE users SET Id = @Id, FirstName = @FirstName, LastName = @LastName, Username = @Username, Role = @Role, Password = @Password, Email = @Email, Supervisor = @Supervisor, Position = @Position WHERE Id = @Id";
 
@@ -140,12 +137,9 @@ namespace backend_staffdirectory.Services {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
 
             string pwSql = "SELECT Id FROM users WHERE Id = @Id";
-
             var pwQuery = _conn.Query<User>(pwSql, new { Id = id }).ToList();
-            var idDb = 0;
-            foreach (var pw in pwQuery) {
-                idDb = pw.Id;
-            };
+
+            var idDb = pwQuery.First().Id;
 
             string sql = "UPDATE users SET Id = @Id, FirstName = @FirstName, LastName = @LastName, Username = @Username, Role = @Role, Password = @Password, Email = @Email, Supervisor = @Supervisor, Position = @Position WHERE Id = @Id";
 
