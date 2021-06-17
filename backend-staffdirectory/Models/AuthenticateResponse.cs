@@ -8,6 +8,9 @@ namespace backend_staffdirectory.Models {
         public string Username { get; set; }
         public string Token { get; set; }
         public string Role { get; set; }
+        public string Email { get; set; }
+        public string Supervisor { get; set; }
+        public string Position { get; set; }
 
         public AuthenticateResponse(User user, string token) {
             Id = user.Id;
@@ -16,6 +19,9 @@ namespace backend_staffdirectory.Models {
             Username = user.Username;
             Token = token;
             Role = user.Role;
+            Email = user.Email;
+            Supervisor = user.Supervisor;
+            Position = user.Position;
         }
     }
 }
