@@ -71,7 +71,13 @@ namespace backend_staffdirectory.Controllers {
         [AuthorizeAdmin]
         [HttpPut("{id}/edit")]
         public IActionResult EditUser(int id, User user) {
-            return Ok();
+            var response = _dbService.EditUserById(id, user);
+
+            if (response == null) {
+                return BadRequest(new { message = "User not found" });
+            }
+
+            return Ok(response);
         }
 
         // Deletes user
@@ -87,14 +93,15 @@ namespace backend_staffdirectory.Controllers {
         // Adds user
         // POST : /users/adduser
         [AuthorizeAdmin]
-        [HttpPut("adduser")]
+        [HttpPost("adduser")]
         public IActionResult AddUser(UserSql user) {
             var response = _dbService.AddUser(user);
 
-            if (response == null) {
-                return BadRequest(new { message = "An error occurred" });
+            if (response == 0) {
+                return BadRequest(new { message = "An error occurred - Duplicate entry (Check username or email)" });
             }
 
+            // number of users added (should be 1)
             return Ok(response);
         }
 
@@ -118,8 +125,16 @@ namespace backend_staffdirectory.Controllers {
         // PUT : /users/myprofile/edit
         [Authorize]
         [HttpPut("myprofile/edit")]
-        public IActionResult EditProfile(User user) {
-            return Ok();
+        public IActionResult EditProfile(UserSql user) {
+            var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var id = _userService.GetIdInContext(token);
+            var response = _dbService.EditProfileById(id, user);
+
+            if (response == null) {
+                return BadRequest(new { message = "User not found" });
+            }
+
+            return Ok(response);
         }
     }
 }

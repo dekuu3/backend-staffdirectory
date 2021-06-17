@@ -5,6 +5,7 @@ using backend_staffdirectory.Entities;
 using MySqlConnector;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace backend_staffdirectory.Services {
     public interface IDatabaseService {
@@ -12,9 +13,9 @@ namespace backend_staffdirectory.Services {
         User GetUserByUsernameAndPassword(string un, string pw);
         User GetUserById(int id);
         User EditUserById(int id, User user);
+        User EditProfileById(int id, UserSql user);
         int DeleteUserById(int id);
-        UserSql AddUser(UserSql user);
-
+        int AddUser(UserSql user);
     }
 
     public class DatabaseService : IDatabaseService {
@@ -101,8 +102,83 @@ namespace backend_staffdirectory.Services {
         }
 
         public User EditUserById(int id, User user) {
-  
+            var _conn = new MySqlConnection(_config["ConnectionString"]);
+            string pwSql = "SELECT Id, Password FROM users WHERE Id = @Id";
+
+            var pwQuery = _conn.Query<User>(pwSql, new { Id = id }).ToList();
+            var password = "";
+            var idDb = 0;
+            foreach (var pw in pwQuery) {
+                password = pw.Password;
+                idDb = pw.Id;
+            };
+
+            string sql = "UPDATE users SET Id = @Id, FirstName = @FirstName, LastName = @LastName, Username = @Username, Role = @Role, Password = @Password, Email = @Email, Supervisor = @Supervisor, Position = @Position WHERE Id = @Id";
+
+            try {
+                var query = _conn.Execute(sql, new {
+                    idDb,
+                    user.FirstName,
+                    user.LastName,
+                    user.Username,
+                    user.Role,
+                    password,
+                    user.Email,
+                    user.Supervisor,
+                    user.Position,
+                    Id = id
+                });
+            }
+            catch (DbUpdateException) {
+                throw;
+            }
+
             return user;
+        }
+
+        public User EditProfileById(int id, UserSql user) {
+            var _conn = new MySqlConnection(_config["ConnectionString"]);
+
+            string pwSql = "SELECT Id FROM users WHERE Id = @Id";
+
+            var pwQuery = _conn.Query<User>(pwSql, new { Id = id }).ToList();
+            var idDb = 0;
+            foreach (var pw in pwQuery) {
+                idDb = pw.Id;
+            };
+
+            string sql = "UPDATE users SET Id = @Id, FirstName = @FirstName, LastName = @LastName, Username = @Username, Role = @Role, Password = @Password, Email = @Email, Supervisor = @Supervisor, Position = @Position WHERE Id = @Id";
+
+            try {
+                var query = _conn.Execute(sql, new {
+                    idDb,
+                    user.FirstName,
+                    user.LastName,
+                    user.Username,
+                    user.Role,
+                    user.Password,
+                    user.Email,
+                    user.Supervisor,
+                    user.Position,
+                    Id = id
+                });
+            }
+            catch (DbUpdateException) {
+                throw;
+            }
+
+            User newUser = new() {
+                Id = idDb,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Role,
+                Password = user.Password,
+                Email = user.Email,
+                Supervisor = user.Supervisor,
+                Position = user.Position
+            };
+
+            return newUser;
         }
 
         public int DeleteUserById(int id) {
@@ -113,26 +189,49 @@ namespace backend_staffdirectory.Services {
             return rowsAffected;
         }
 
-        public UserSql AddUser(UserSql user) {
-            var _conn = new MySqlConnection(_config["ConnectionString"]);
-            string sql = "INSERT INTO users (FirstName, LastName, Username, Role, Password, Email, Supervisor, Position) VALUES (@FirstName, @LastName, @Username, @Role, @Password, @Email, @Supervisor, @Position)";
+        public int AddUser(UserSql user) {
+            var checkIfUserExists = GetUserByUsernameAndEmail(user);
+            
+            if (checkIfUserExists == true) {
+                return 0;
+            } else {
+                var _conn = new MySqlConnection(_config["ConnectionString"]);
+                string sql = "INSERT INTO users (FirstName, LastName, Username, Role, Password, Email, Supervisor, Position) VALUES (@FirstName, @LastName, @Username, @Role, @Password, @Email, @Supervisor, @Position);";
+                int query;
+                try {
+                    query = _conn.Execute(sql, new {
+                        user.FirstName,
+                        user.LastName,
+                        user.Username,
+                        user.Role,
+                        user.Password,
+                        user.Email,
+                        user.Supervisor,
+                        user.Position
+                    });
 
-            try {
-                var query = _conn.Execute(sql, new {
-                    user.FirstName,
-                    user.LastName,
-                    user.Username,
-                    user.Role,
-                    user.Password,
-                    user.Email,
-                    user.Supervisor,
-                    user.Position
-                });
-            } catch(DbUpdateException) {
-                throw;
+                    return query;
+                }
+                catch (Exception) {
+                    return 0;
+                }
+            }
+        }
+
+        public bool GetUserByUsernameAndEmail(UserSql user) {
+            var _conn = new MySqlConnection(_config["ConnectionString"]);
+            string sql = "SELECT * FROM users WHERE Username = @Username AND Email = @Email";
+
+            var response = _conn.Query<UserSql>(sql, new {
+                user.Username,
+                user.Email,
+            });
+
+            if (response.Count() == 0) {
+                return false;
             }
 
-            return user;
+            return true;
         }
     }
 }
