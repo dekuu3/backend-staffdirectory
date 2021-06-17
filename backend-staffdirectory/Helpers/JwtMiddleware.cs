@@ -8,26 +8,39 @@ using System.Text;
 using System.Threading.Tasks;
 using backend_staffdirectory.Services;
 
+/*
+ * This middleware checks if there is a token in the request "Authorization" header
+ *      If so:
+ *      - validates token
+ *      - extracts user id from token
+ *      - attaches authenticated user  and role to the current httpcontext.items collection
+ *          to make it accessible within the scope of the current request
+ * If theres no token or any of these steps fail then no user is attached to the httpcontext and
+ * and the request is only able to access the public routes
+ */
+
 namespace backend_staffdirectory.Helpers {
     public class JwtMiddleware {
         private readonly RequestDelegate _next;
         private readonly AppSettings _appSettings;
+        private readonly IDatabaseService _databaseService;
 
-        public JwtMiddleware(RequestDelegate next, IOptions<AppSettings> appSettings) {
+        public JwtMiddleware(RequestDelegate next, IOptions<AppSettings> appSettings, IDatabaseService databaseService) {
             _next = next;
             _appSettings = appSettings.Value;
+            _databaseService = databaseService;
         }
 
-        public async Task Invoke(HttpContext context, IUserService userService) {
+        public async Task Invoke(HttpContext context) {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             if (token != null)
-                attachUserToContext(context, userService, token);
+                attachUserToContext(context, token);
 
             await _next(context);
         }
 
-        private void attachUserToContext(HttpContext context, IUserService userService, string token) {
+        private void attachUserToContext(HttpContext context, string token) {
             try {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
@@ -42,12 +55,16 @@ namespace backend_staffdirectory.Helpers {
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                //var userRole = jwtToken.Claims.First(x => x.Type == "Role").GetType();
 
                 // attach user to context on successful jwt validation
-                context.Items["User"] = userService.GetById(userId);
+                context.Items["User"] = _databaseService.GetUserById(userId);
+
+                // attach role to context on successful jwt validation
+                //context.Items["Role"] = userService.GetById(userId).Role;
             }
             catch {
-                // do nothing if jwt validation fails
+                // jwt validation fails
                 // user is not attached to context so request won't have access to secure routes
             }
         }

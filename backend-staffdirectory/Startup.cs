@@ -6,43 +6,15 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using backend_staffdirectory.Helpers;
 using backend_staffdirectory.Services;
+using Microsoft.EntityFrameworkCore;
+using backend_staffdirectory.Contexts;
+using System;
 
 namespace backend_staffdirectory {
     public class Startup {
         public IConfiguration Configuration { get; }
 
-        //    public Startup(IConfiguration configuration) {
-        //        Configuration = configuration;
-        //    }
-
-        //    // add services to the DI container
-        //    public void ConfigureServices(IServiceCollection services) {
-        //        services.AddCors();
-        //        services.AddControllers();
-
-        //        // configure strongly typed settings object
-        //        services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
-
-        //        // configure DI for application services
-        //        services.AddScoped<IUserService, UserService>();
-        //    }
-
-        //    // configure the HTTP request pipeline
-        //    public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
-        //        app.UseRouting();
-
-        //        // global cors policy
-        //        app.UseCors(x => x
-        //            .AllowAnyOrigin()
-        //            .AllowAnyMethod()
-        //            .AllowAnyHeader());
-
-        //        // custom jwt auth middleware
-        //        app.UseMiddleware<JwtMiddleware>();
-
-        //        app.UseEndpoints(x => x.MapControllers());
-        //    }
-        //}
+        private string _ConnectionString = null;
 
         public Startup(IConfiguration configuration) {
             Configuration = configuration;
@@ -55,6 +27,17 @@ namespace backend_staffdirectory {
                 opt.AddDefaultPolicy(build => build.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
 
+            _ConnectionString = Configuration["ConnectionString"];
+
+            var serverVersion = new MySqlServerVersion(new Version(8, 0, 21));
+
+            services.AddDbContext<UsersContext>(
+                dbContextOptions => dbContextOptions
+                    .UseMySql(_ConnectionString, serverVersion)
+                    .EnableSensitiveDataLogging()
+                    .EnableDetailedErrors()
+            );
+
             services.AddControllers();
             services.AddSwaggerGen(c => {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "backend_staffdirectory", Version = "v1" });
@@ -65,6 +48,7 @@ namespace backend_staffdirectory {
 
             // configure Dependency Injection for application services
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IDatabaseService, DatabaseService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
