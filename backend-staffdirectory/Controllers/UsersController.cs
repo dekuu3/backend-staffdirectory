@@ -95,6 +95,7 @@ namespace backend_staffdirectory.Controllers {
         [AuthorizeAdmin]
         [HttpPost("adduser")]
         public IActionResult AddUser(UserSql user) {
+            //user.Password = _userService.Hash(user.Password);
             var response = _dbService.AddUser(user);
 
             if (response == 0) {
