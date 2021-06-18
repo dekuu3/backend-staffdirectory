@@ -19,6 +19,8 @@ using Microsoft.Extensions.Configuration;
  *      -retrieves all users
  *      -gets users by id
  *      -generates jwt tokens for users
+ *      -hashes passwords
+ *      -verifies hashed passwords against passwords input by users
  */
 
 namespace backend_staffdirectory.Services {
@@ -42,14 +44,29 @@ namespace backend_staffdirectory.Services {
         }
 
         public AuthenticateResponse Authenticate(AuthenticateRequest model) {
-            var user = _dbService.GetUserByUsernameAndPassword(model.Username, model.Password);
-
+            var user = _dbService.GetUserByUsername(model.Username);
+            
             if (user == null) return null;
 
-            // authentication successful so generate jwt token
-            var token = generateJwtToken(user);
+            var isPasswordCorrect = VerifyPassword(model.Password, user.Password);
 
-            return new AuthenticateResponse(user, token);
+            if (isPasswordCorrect == false) return null;
+
+            User newUser = new() {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Username = user.Username,
+                Role = user.Role,
+                Email = user.Email,
+                Supervisor = user.Supervisor,
+                Position = user.Position
+            };
+
+            // authentication successful so generate jwt token
+            var token = generateJwtToken(newUser);
+
+            return new AuthenticateResponse(newUser, token);
         }
 
         public int GetIdInToken(string token) {

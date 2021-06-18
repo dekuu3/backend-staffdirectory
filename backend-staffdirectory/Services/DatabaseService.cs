@@ -11,7 +11,7 @@ using System.Diagnostics;
 namespace backend_staffdirectory.Services {
     public interface IDatabaseService {
         List<User> GetAllUsers();
-        User GetUserByUsernameAndPassword(string un, string pw);
+        UserSql GetUserByUsername(string un);
         User GetUserById(int id);
         User EditUserById(int id, User user);
         User EditProfileById(int id, UserSql user);
@@ -21,7 +21,6 @@ namespace backend_staffdirectory.Services {
 
     public class DatabaseService : IDatabaseService {
         private readonly IConfiguration _config;
-
         public DatabaseService() { }
 
         public DatabaseService(IConfiguration config) {
@@ -33,73 +32,31 @@ namespace backend_staffdirectory.Services {
 
             string sql = "SELECT * FROM users";
 
-            var users = _conn.Query<UserSql>(sql).ToList();
+            var users = _conn.Query<User>(sql).ToList();
 
-            List<User> newUserList = new();
-
-            foreach (var u in users) {
-                User newUser = new() {
-                Id = u.Id,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
-                Username = u.LastName,
-                Password = u.Password,
-                Role = u.Role,
-                Email = u.Email,
-                Supervisor = u.Supervisor,
-                Position = u.Position,
-            };
-                newUserList.Add(newUser);
-            }
-            return newUserList;
+            return users;
         }
 
-        public User GetUserByUsernameAndPassword(string un, string pw) {
+        public UserSql GetUserByUsername(string un) {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
-            string sql = "SELECT * FROM users WHERE Username = @Username AND Password = @Password";
+            string sql = "SELECT * FROM users WHERE Username = @Username";
 
-            var user = _conn.Query<UserSql>(sql, new { Username = un, Password = pw }).ToList();
+            var user = _conn.Query<UserSql>(sql, new { Username = un}).ToList();
 
             if (user.Count() == 0 || user == null) return null;
 
-            User newUser = new();
-
-            foreach (var u in user) {
-                newUser.Id = u.Id;
-                newUser.FirstName = u.FirstName;
-                newUser.LastName = u.LastName;
-                newUser.Username = u.LastName;
-                newUser.Password = u.Password;
-                newUser.Role = u.Role;
-                newUser.Email = u.Email;
-                newUser.Supervisor = u.Supervisor;
-                newUser.Position = u.Position;
-            }
-            return newUser;
+            return user.First();
         }
 
         public User GetUserById(int id) {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
             string sql = "SELECT * FROM users WHERE Id = @Id";
 
-            var user = _conn.Query<UserSql>(sql, new { Id = id }).ToList();
+            var user = _conn.Query<User>(sql, new { Id = id }).ToList();
 
             if (user.Count() == 0 || user == null) return null;
 
-            User newUser = new();
-
-            foreach (var u in user) {
-                newUser.Id = u.Id;
-                newUser.FirstName = u.FirstName;
-                newUser.LastName = u.LastName;
-                newUser.Username = u.LastName;
-                newUser.Password = u.Password;
-                newUser.Role = u.Role;
-                newUser.Email = u.Email;
-                newUser.Supervisor = u.Supervisor;
-                newUser.Position = u.Position;
-            }
-            return newUser;
+            return user.First();
         }
 
         public User EditUserById(int id, User user) {
@@ -220,6 +177,7 @@ namespace backend_staffdirectory.Services {
             }
         }
 
+        // HELPER FUNCTIONS
         public bool GetUserByUsernameAndEmail(UserSql user) {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
             string sql = "SELECT * FROM users WHERE Username = @Username AND Email = @Email";
@@ -236,25 +194,25 @@ namespace backend_staffdirectory.Services {
             return true;
         }
 
-        // HELPER FUNCTIONS
-        // This checks if some "user" values are null
-        // If they are, they're replaced by the existing values currently in the DB
+        // If some values are null they're replaced by the existing values in the DB
         public User PopulateEditUserQuery(List<User> dbUser, User user) {
             User tempUser = new();
 
-            tempUser.FirstName = (user.FirstName == null || user.FirstName == "" || user.FirstName == " ") ? dbUser.First().FirstName : user.FirstName;
+            tempUser.Id = dbUser.First().Id;
 
-            tempUser.LastName = (user.LastName == null || user.LastName == "" || user.LastName == " ") ? dbUser.First().LastName : user.LastName;
+            tempUser.FirstName = (user.FirstName == null || user.FirstName.Trim() == "") ? dbUser.First().FirstName : user.FirstName;
 
-            tempUser.Username = (user.Username == null || user.Username == "" || user.Username == " ") ? dbUser.First().Username : user.Username;
+            tempUser.LastName = (user.LastName == null || user.LastName.Trim() == "") ? dbUser.First().LastName : user.LastName;
 
-            tempUser.Role = (user.Role == null || user.Role == "" || user.Role == " ") ? dbUser.First().Role : user.Role;
+            tempUser.Username = (user.Username == null || user.Username.Trim() == "") ? dbUser.First().Username : user.Username;
 
-            tempUser.Email = (user.Email == null || user.Email == "" || user.Email == " ") ? dbUser.First().Email : user.Email;
+            tempUser.Role = (user.Role == null || user.Role.Trim() == "") ? dbUser.First().Role : user.Role;
 
-            tempUser.Supervisor = (user.Supervisor == null || user.Supervisor == "" || user.Supervisor == " ") ? dbUser.First().Supervisor : user.Supervisor;
+            tempUser.Email = (user.Email == null || user.Email.Trim() == "") ? dbUser.First().Email : user.Email;
 
-            tempUser.Position = (user.Position == null || user.Position == "" || user.Position == " ") ? dbUser.First().Position : user.Position;
+            tempUser.Supervisor = (user.Supervisor == null || user.Supervisor.Trim() == "") ? dbUser.First().Supervisor : user.Supervisor;
+
+            tempUser.Position = (user.Position == null || user.Position.Trim() == "") ? dbUser.First().Position : user.Position;
 
             return tempUser;
         }
@@ -262,21 +220,23 @@ namespace backend_staffdirectory.Services {
         public UserSql PopulateEditProfileQuery(List<User> dbUser, UserSql user) {
             UserSql tempUser = new();
 
-            tempUser.FirstName = (user.FirstName == null || user.FirstName == "" || user.FirstName == " ") ? dbUser.First().FirstName : user.FirstName;
+            tempUser.Id = dbUser.First().Id;
 
-            tempUser.LastName = (user.LastName == null || user.LastName == "" || user.LastName == " ") ? dbUser.First().LastName : user.LastName;
+            tempUser.FirstName = (user.FirstName == null || user.FirstName.Trim() == "") ? dbUser.First().FirstName : user.FirstName;
 
-            tempUser.Username = (user.Username == null || user.Username == "" || user.Username == " ") ? dbUser.First().Username : user.Username;
+            tempUser.LastName = (user.LastName == null || user.LastName.Trim() == "") ? dbUser.First().LastName : user.LastName;
 
-            tempUser.Role = (user.Role == null || user.Role == "" || user.Role == " ") ? dbUser.First().Role : user.Role;
+            tempUser.Username = (user.Username == null || user.Username.Trim() == "") ? dbUser.First().Username : user.Username;
 
-            tempUser.Password = (user.Password == null || user.Password == "" || user.Password == " ") ? dbUser.First().Password : user.Password;
+            tempUser.Role = (user.Role == null || user.Role.Trim() == "") ? dbUser.First().Role : user.Role;
 
-            tempUser.Email = (user.Email == null || user.Email == "" || user.Email == " ") ? dbUser.First().Email : user.Email;
+            tempUser.Password = (user.Password == null || user.Password.Trim() == "") ? dbUser.First().Password : user.Password;
 
-            tempUser.Supervisor = (user.Supervisor == null || user.Supervisor == "" || user.Supervisor == " ") ? dbUser.First().Supervisor : user.Supervisor;
+            tempUser.Email = (user.Email == null || user.Email.Trim() == "") ? dbUser.First().Email : user.Email;
 
-            tempUser.Position = (user.Position == null || user.Position == "" || user.Position == " ") ? dbUser.First().Position : user.Position;
+            tempUser.Supervisor = (user.Supervisor == null || user.Supervisor.Trim() == "") ? dbUser.First().Supervisor : user.Supervisor;
+
+            tempUser.Position = (user.Position == null || user.Position.Trim() == "" ) ? dbUser.First().Position : user.Position;
 
             return tempUser;
         }

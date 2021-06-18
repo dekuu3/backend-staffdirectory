@@ -8,11 +8,6 @@ using System;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 
-/*
- * This controls the routes and http requests received from the front-end.
- * Makes use of the UserService to authenticate and retrieve users ( via the IUserService interface)
- */
-
 namespace backend_staffdirectory.Controllers {
 
     [ApiController]
@@ -95,7 +90,7 @@ namespace backend_staffdirectory.Controllers {
         [AuthorizeAdmin]
         [HttpPost("adduser")]
         public IActionResult AddUser(UserSql user) {
-            //user.Password = _userService.Hash(user.Password);
+            user.Password = _userService.Hash(user.Password);
             var response = _dbService.AddUser(user);
 
             if (response == 0) {
@@ -129,6 +124,11 @@ namespace backend_staffdirectory.Controllers {
         public IActionResult EditProfile(UserSql user) {
             var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             var id = _userService.GetIdInToken(token);
+
+            if (user.Password != null || user.Password.Trim() != "") {
+                user.Password = _userService.Hash(user.Password);
+            }
+
             var response = _dbService.EditProfileById(id, user);
 
             if (response == null) {
