@@ -125,9 +125,11 @@ namespace backend_staffdirectory.Controllers {
             var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             var id = _userService.GetIdInToken(token);
 
-            if (user.Password != null || user.Password.Trim() != "") {
-                user.Password = _userService.Hash(user.Password);
-            }
+            if (user.Password != null) {
+                if (user.Password.Trim() != "") {
+                    user.Password = _userService.Hash(user.Password);
+                }
+            };
 
             var response = _dbService.EditProfileById(id, user);
 

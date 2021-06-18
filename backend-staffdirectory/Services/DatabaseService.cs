@@ -129,8 +129,8 @@ namespace backend_staffdirectory.Services {
                 Id = idInDb,
                 FirstName = tempUser.FirstName,
                 LastName = tempUser.LastName,
+                Username = tempUser.Username,
                 Role = tempUser.Role,
-                Password = tempUser.Password,
                 Email = tempUser.Email,
                 Supervisor = tempUser.Supervisor,
                 Position = tempUser.Position
