@@ -6,6 +6,7 @@ using MySqlConnector;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Diagnostics;
 
 namespace backend_staffdirectory.Services {
     public interface IDatabaseService {
@@ -104,72 +105,78 @@ namespace backend_staffdirectory.Services {
         public User EditUserById(int id, User user) {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
 
-            string pwSql = "SELECT Id, Password FROM users WHERE Id = @Id";
-            var pwQuery = _conn.Query<User>(pwSql, new { Id = id }).ToList();
+            string pwSql = "SELECT * FROM users WHERE Id = @Id";
+            var query = _conn.Query<User>(pwSql, new { Id = id }).ToList();
 
-            var password = pwQuery.First().Password;
-            var idDb = pwQuery.First().Id;
+            var idInDb = query.First().Id;
+            var passwordInDb = query.First().Password;
+
+            var tempUser = PopulateEditUserQuery(query, user);
 
             string sql = "UPDATE users SET Id = @Id, FirstName = @FirstName, LastName = @LastName, Username = @Username, Role = @Role, Password = @Password, Email = @Email, Supervisor = @Supervisor, Position = @Position WHERE Id = @Id";
 
             try {
-                var query = _conn.Execute(sql, new {
-                    idDb,
-                    user.FirstName,
-                    user.LastName,
-                    user.Username,
-                    user.Role,
-                    password,
-                    user.Email,
-                    user.Supervisor,
-                    user.Position,
+                _conn.Execute(sql, new {
+                    idInDb,
+                    tempUser.FirstName,
+                    tempUser.LastName,
+                    tempUser.Username,
+                    tempUser.Role,
+                    Password = passwordInDb,
+                    tempUser.Email,
+                    tempUser.Supervisor,
+                    tempUser.Position,
                     Id = id
                 });
             }
-            catch (DbUpdateException) {
+            catch (Exception ex) {
+                Debug.WriteLine(ex);
                 throw;
             }
 
-            return user;
+            return tempUser;
         }
 
         public User EditProfileById(int id, UserSql user) {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
 
-            string pwSql = "SELECT Id FROM users WHERE Id = @Id";
-            var pwQuery = _conn.Query<User>(pwSql, new { Id = id }).ToList();
+            string pwSql = "SELECT * FROM users WHERE Id = @Id";
+            var query = _conn.Query<User>(pwSql, new { Id = id }).ToList();
 
-            var idDb = pwQuery.First().Id;
+            var idInDb = query.First().Id;
+
+            var tempUser = PopulateEditProfileQuery(query, user);
 
             string sql = "UPDATE users SET Id = @Id, FirstName = @FirstName, LastName = @LastName, Username = @Username, Role = @Role, Password = @Password, Email = @Email, Supervisor = @Supervisor, Position = @Position WHERE Id = @Id";
 
             try {
-                var query = _conn.Execute(sql, new {
-                    idDb,
-                    user.FirstName,
-                    user.LastName,
-                    user.Username,
-                    user.Role,
-                    user.Password,
-                    user.Email,
-                    user.Supervisor,
-                    user.Position,
+                _conn.Execute(sql, new {
+                    idInDb,
+                    tempUser.FirstName,
+                    tempUser.LastName,
+                    tempUser.Username,
+                    tempUser.Role,
+                    tempUser.Password,
+                    tempUser.Email,
+                    tempUser.Supervisor,
+                    tempUser.Position,
                     Id = id
                 });
             }
-            catch (DbUpdateException) {
+            catch (Exception ex) {
+                Debug.WriteLine(ex);
                 throw;
             }
 
             User newUser = new() {
-                Id = idDb,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Role = user.Role,
-                Password = user.Password,
-                Email = user.Email,
-                Supervisor = user.Supervisor,
-                Position = user.Position
+                Id = idInDb,
+                FirstName = tempUser.FirstName,
+                LastName = tempUser.LastName,
+                Role = tempUser.Role,
+                Password = tempUser.Password,
+                Email = tempUser.Email,
+                Supervisor = tempUser.Supervisor,
+                Position = tempUser.Position
             };
 
             return newUser;
@@ -206,7 +213,8 @@ namespace backend_staffdirectory.Services {
 
                     return query;
                 }
-                catch (Exception) {
+                catch (Exception ex) {
+                    Debug.WriteLine("Exception " + ex);
                     return 0;
                 }
             }
@@ -226,6 +234,51 @@ namespace backend_staffdirectory.Services {
             }
 
             return true;
+        }
+
+        // HELPER FUNCTIONS
+        // This checks if some "user" values are null
+        // If they are, they're replaced by the existing values currently in the DB
+        public User PopulateEditUserQuery(List<User> dbUser, User user) {
+            User tempUser = new();
+
+            tempUser.FirstName = (user.FirstName == null || user.FirstName == "" || user.FirstName == " ") ? dbUser.First().FirstName : user.FirstName;
+
+            tempUser.LastName = (user.LastName == null || user.LastName == "" || user.LastName == " ") ? dbUser.First().LastName : user.LastName;
+
+            tempUser.Username = (user.Username == null || user.Username == "" || user.Username == " ") ? dbUser.First().Username : user.Username;
+
+            tempUser.Role = (user.Role == null || user.Role == "" || user.Role == " ") ? dbUser.First().Role : user.Role;
+
+            tempUser.Email = (user.Email == null || user.Email == "" || user.Email == " ") ? dbUser.First().Email : user.Email;
+
+            tempUser.Supervisor = (user.Supervisor == null || user.Supervisor == "" || user.Supervisor == " ") ? dbUser.First().Supervisor : user.Supervisor;
+
+            tempUser.Position = (user.Position == null || user.Position == "" || user.Position == " ") ? dbUser.First().Position : user.Position;
+
+            return tempUser;
+        }
+
+        public UserSql PopulateEditProfileQuery(List<User> dbUser, UserSql user) {
+            UserSql tempUser = new();
+
+            tempUser.FirstName = (user.FirstName == null || user.FirstName == "" || user.FirstName == " ") ? dbUser.First().FirstName : user.FirstName;
+
+            tempUser.LastName = (user.LastName == null || user.LastName == "" || user.LastName == " ") ? dbUser.First().LastName : user.LastName;
+
+            tempUser.Username = (user.Username == null || user.Username == "" || user.Username == " ") ? dbUser.First().Username : user.Username;
+
+            tempUser.Role = (user.Role == null || user.Role == "" || user.Role == " ") ? dbUser.First().Role : user.Role;
+
+            tempUser.Password = (user.Password == null || user.Password == "" || user.Password == " ") ? dbUser.First().Password : user.Password;
+
+            tempUser.Email = (user.Email == null || user.Email == "" || user.Email == " ") ? dbUser.First().Email : user.Email;
+
+            tempUser.Supervisor = (user.Supervisor == null || user.Supervisor == "" || user.Supervisor == " ") ? dbUser.First().Supervisor : user.Supervisor;
+
+            tempUser.Position = (user.Position == null || user.Position == "" || user.Position == " ") ? dbUser.First().Position : user.Position;
+
+            return tempUser;
         }
     }
 }

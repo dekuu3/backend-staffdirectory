@@ -55,7 +55,7 @@ namespace backend_staffdirectory.Contexts {
 
                 entity.Property(e => e.Password)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasMaxLength(100);
 
                 entity.Property(e => e.Role)
                     .IsRequired()
