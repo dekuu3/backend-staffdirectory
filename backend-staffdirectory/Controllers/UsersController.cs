@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
+using System.Threading;
 
 namespace backend_staffdirectory.Controllers {
 
@@ -15,10 +16,12 @@ namespace backend_staffdirectory.Controllers {
     public class UsersController : ControllerBase {
         private readonly IUserService _userService;
         private readonly IDatabaseService _dbService;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public UsersController(IUserService userService, IDatabaseService databaseService) {
+        public UsersController(IUserService userService, IDatabaseService databaseService, ICloudinaryService cloudinaryService) {
             _userService = userService;
             _dbService = databaseService;
+            _cloudinaryService = cloudinaryService;
         }
 
         // To log in
@@ -91,6 +94,12 @@ namespace backend_staffdirectory.Controllers {
         [HttpPost("adduser")]
         public IActionResult AddUser(UserSql user) {
             user.Password = _userService.Hash(user.Password);
+
+            // Assign default image
+            if (user.Image == null ) {
+                user.Image = "https://res.cloudinary.com/dqmoirffd/image/upload/v1624287823/sample.jpg";
+            }
+
             var response = _dbService.AddUser(user);
 
             if (response == 0) {
@@ -138,6 +147,41 @@ namespace backend_staffdirectory.Controllers {
             }
 
             return Ok(response);
+        }
+
+        // Edits user image of whoever's logged in
+        // POST : /users/myprofile/edit/image
+        [Authorize]
+        [HttpPost("myprofile/edit/image")]
+        public IActionResult EditProfileImage([FromForm] IFormFile file) {         
+            // Get id of person making request
+            var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var id = _userService.GetIdInToken(token);
+
+            // Save file to TempMedia folder
+            _userService.WriteFile(file);
+
+            // Upload file to cloudinary service
+            var response = _cloudinaryService.UploadPhoto(file);
+
+            if (response == null) {
+                return BadRequest(new { message = "Error uploading photo" });
+            }
+
+            // Delete file from TempMedia folder
+            _userService.DeleteFile(file);
+
+            // Get url from ImageUploadResult object
+            var url = response.Url.ToString();
+
+            //add url to the db id
+            var isSuccess = _dbService.EditProfilePhotoById(url, id);
+
+            if (isSuccess == true) {
+                return Ok((new { url }));
+            }
+
+            return BadRequest(new { message = "Error uploading photo" });
         }
     }
 }

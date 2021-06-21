@@ -12,6 +12,8 @@ using backend_staffdirectory.Helpers;
 using Microsoft.AspNetCore.Http;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
+using System.IO;
 
 /*
  * This service:
@@ -29,6 +31,8 @@ namespace backend_staffdirectory.Services {
         int GetIdInToken(string token);
         string Hash(string password);
         bool VerifyPassword(string password, string hashedPassword);
+        Task<bool> WriteFile(IFormFile file);
+        bool DeleteFile(IFormFile file);
     }
 
     public class UserService : IUserService {
@@ -81,6 +85,41 @@ namespace backend_staffdirectory.Services {
         // Verifies a password against a hash.
         public bool VerifyPassword(string password, string hashedPassword) {
             return Verify(password, hashedPassword);
+        }
+
+        // Saves file to TempMedia folder
+        public async Task<bool> WriteFile(IFormFile file) {
+
+            try {
+                var pathBuilt = Path.Combine(Directory.GetCurrentDirectory(), "TempMedia");
+
+                if (!Directory.Exists(pathBuilt)) {
+                    Directory.CreateDirectory(pathBuilt);
+                }
+
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "TempMedia", file.FileName);
+
+                using (var stream = new FileStream(path, FileMode.Create)) {
+                    await file.CopyToAsync(stream);
+                }
+
+                return true;
+            } 
+            catch (Exception) {
+                return false;
+            }
+        }
+
+        // Deletes file from TempMedia folder
+        public bool DeleteFile(IFormFile file) {
+            try {
+                File.Delete($@"TempMedia/{file.FileName}");
+                
+                return true;
+            }
+            catch (Exception) {
+                return false;
+            }
         }
 
         // HELPER FUNCTIONS

@@ -13,6 +13,7 @@ namespace backend_staffdirectory.Entities {
         public string Email { get; set; }
         public string Supervisor { get; set; }
         public string Position { get; set; }
+        public string Image { get; set; }
 
         //Another way to prevent password from being serialized and returned would
         //be to create a helper function that sets password to null just before
