@@ -76,6 +76,9 @@ namespace backend_staffdirectory.Contexts {
                 entity.Property(e => e.Position)
                     .IsRequired()
                     .HasMaxLength(50);
+
+                entity.Property(e => e.Image)
+                .HasMaxLength(100);
             });
 
             OnModelCreatingPartial(modelBuilder);

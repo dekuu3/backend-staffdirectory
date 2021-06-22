@@ -49,6 +49,7 @@ namespace backend_staffdirectory {
             // configure Dependency Injection for application services
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IDatabaseService, DatabaseService>();
+            services.AddScoped<ICloudinaryService, CloudinaryService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

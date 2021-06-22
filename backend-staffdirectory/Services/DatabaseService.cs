@@ -17,6 +17,7 @@ namespace backend_staffdirectory.Services {
         User EditProfileById(int id, UserSql user);
         int DeleteUserById(int id);
         int AddUser(UserSql user);
+        bool EditProfilePhotoById(string url, int id);
     }
 
     public class DatabaseService : IDatabaseService {
@@ -133,7 +134,8 @@ namespace backend_staffdirectory.Services {
                 Role = tempUser.Role,
                 Email = tempUser.Email,
                 Supervisor = tempUser.Supervisor,
-                Position = tempUser.Position
+                Position = tempUser.Position,
+                Image = tempUser.Image
             };
 
             return newUser;
@@ -177,6 +179,30 @@ namespace backend_staffdirectory.Services {
             }
         }
 
+        public bool EditProfilePhotoById(string url, int id) {
+            var _conn = new MySqlConnection(_config["ConnectionString"]);
+
+            string pwSql = "SELECT * FROM users WHERE Id = @Id";
+            var query = _conn.Query<User>(pwSql, new { Id = id }).ToList();
+
+            var idInDb = query.First().Id;
+
+            string sql = "UPDATE users SET Image = @Image WHERE Id = @Id";
+
+            try {
+                _conn.Execute(sql, new {
+                    Image = url,
+                    Id = id
+                });
+            }
+            catch (Exception ex) {
+                Debug.WriteLine(ex);
+                return false;
+            }
+
+            return true;
+        }
+
         // HELPER FUNCTIONS
         public bool GetUserByUsernameAndEmail(UserSql user) {
             var _conn = new MySqlConnection(_config["ConnectionString"]);
@@ -214,6 +240,8 @@ namespace backend_staffdirectory.Services {
 
             tempUser.Position = (user.Position == null || user.Position.Trim() == "") ? dbUser.First().Position : user.Position;
 
+            tempUser.Image = dbUser.First().Image;
+
             return tempUser;
         }
 
@@ -237,6 +265,8 @@ namespace backend_staffdirectory.Services {
             tempUser.Supervisor = (user.Supervisor == null || user.Supervisor.Trim() == "") ? dbUser.First().Supervisor : user.Supervisor;
 
             tempUser.Position = (user.Position == null || user.Position.Trim() == "" ) ? dbUser.First().Position : user.Position;
+
+            tempUser.Image = dbUser.First().Image;
 
             return tempUser;
         }

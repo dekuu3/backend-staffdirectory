@@ -12,16 +12,8 @@ using backend_staffdirectory.Helpers;
 using Microsoft.AspNetCore.Http;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Configuration;
-
-/*
- * This service:
- *      -authenticates users
- *      -retrieves all users
- *      -gets users by id
- *      -generates jwt tokens for users
- *      -hashes passwords
- *      -verifies hashed passwords against passwords input by users
- */
+using System.Threading.Tasks;
+using System.IO;
 
 namespace backend_staffdirectory.Services {
     public interface IUserService {
@@ -29,6 +21,9 @@ namespace backend_staffdirectory.Services {
         int GetIdInToken(string token);
         string Hash(string password);
         bool VerifyPassword(string password, string hashedPassword);
+        Task<bool> WriteFile(IFormFile file);
+        bool DeleteFile(IFormFile file);
+        string ModifyImageUrl(string url);
     }
 
     public class UserService : IUserService {
@@ -81,6 +76,49 @@ namespace backend_staffdirectory.Services {
         // Verifies a password against a hash.
         public bool VerifyPassword(string password, string hashedPassword) {
             return Verify(password, hashedPassword);
+        }
+
+        // Saves file to TempMedia folder
+        public async Task<bool> WriteFile(IFormFile file) {
+
+            try {
+                var pathBuilt = Path.Combine(Directory.GetCurrentDirectory(), "TempMedia");
+
+                if (!Directory.Exists(pathBuilt)) {
+                    Directory.CreateDirectory(pathBuilt);
+                }
+
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "TempMedia", file.FileName);
+
+                using (var stream = new FileStream(path, FileMode.Create)) {
+                    await file.CopyToAsync(stream);
+                }
+
+                return true;
+            } 
+            catch (Exception) {
+                return false;
+            }
+        }
+
+        // Deletes file from TempMedia folder
+        public bool DeleteFile(IFormFile file) {
+            try {
+                File.Delete($@"TempMedia/{file.FileName}");
+                
+                return true;
+            }
+            catch (Exception) {
+                return false;
+            }
+        }
+
+        // Modifies image url to transform image
+        public string ModifyImageUrl(string url) {
+            string[] urlArray = url.Split('/');
+            urlArray[6] = "w_250,h_250,c_fill";
+            var newUrl = string.Join("/", urlArray);
+            return newUrl;
         }
 
         // HELPER FUNCTIONS

@@ -15,5 +15,6 @@ namespace backend_staffdirectory.Entities {
         public string Email { get; set; }
         public string Supervisor { get; set; }
         public string Position { get; set; }
+        public string Image { get; set; }
     }
 }
