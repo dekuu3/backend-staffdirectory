@@ -39,7 +39,7 @@ namespace backend_staffdirectory.Services {
             };
 
             ImageUploadResult uploadResult = cloudinary.Upload(uploadParams);
-            
+
             return uploadResult;
         }
     }

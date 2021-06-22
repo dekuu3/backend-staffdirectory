@@ -154,11 +154,15 @@ namespace backend_staffdirectory.Controllers {
         [Authorize]
         [HttpPost("myprofile/edit/image")]
         public IActionResult EditProfileImage([FromForm] IFormFile file) {         
+            if (file == null) {
+                return BadRequest(new { message = "Please upload a photo" });
+            }
+           
             // Get id of person making request
             var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             var id = _userService.GetIdInToken(token);
 
-            // Save file to TempMedia folder
+            // Save temporary file to TempMedia folder
             _userService.WriteFile(file);
 
             // Upload file to cloudinary service
@@ -172,7 +176,7 @@ namespace backend_staffdirectory.Controllers {
             _userService.DeleteFile(file);
 
             // Get url from ImageUploadResult object
-            var url = response.Url.ToString();
+            var url = _userService.ModifyImageUrl(response.SecureUrl.ToString());
 
             //add url to the db id
             var isSuccess = _dbService.EditProfilePhotoById(url, id);

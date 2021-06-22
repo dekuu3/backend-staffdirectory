@@ -15,16 +15,6 @@ using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using System.IO;
 
-/*
- * This service:
- *      -authenticates users
- *      -retrieves all users
- *      -gets users by id
- *      -generates jwt tokens for users
- *      -hashes passwords
- *      -verifies hashed passwords against passwords input by users
- */
-
 namespace backend_staffdirectory.Services {
     public interface IUserService {
         AuthenticateResponse Authenticate(AuthenticateRequest model);
@@ -33,6 +23,7 @@ namespace backend_staffdirectory.Services {
         bool VerifyPassword(string password, string hashedPassword);
         Task<bool> WriteFile(IFormFile file);
         bool DeleteFile(IFormFile file);
+        string ModifyImageUrl(string url);
     }
 
     public class UserService : IUserService {
@@ -120,6 +111,14 @@ namespace backend_staffdirectory.Services {
             catch (Exception) {
                 return false;
             }
+        }
+
+        // Modifies image url to transform image
+        public string ModifyImageUrl(string url) {
+            string[] urlArray = url.Split('/');
+            urlArray[6] = "w_250,h_250,c_fill";
+            var newUrl = string.Join("/", urlArray);
+            return newUrl;
         }
 
         // HELPER FUNCTIONS
